@@ -1,0 +1,23 @@
+name: Refresh Health AI Risk Monitor
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python monitor.py
+      - run: |
+          git config user.name "health-ai-monitor-bot"
+          git config user.email "health-ai-monitor-bot@users.noreply.github.com"
+          git add data/health_ai_risks.csv
+          git diff --cached --quiet || git commit -m "data: refresh health AI risk monitor"
+          git push
